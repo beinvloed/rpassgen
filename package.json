@@ -1,0 +1,52 @@
+{
+  "name": "rpassgen",
+  "version": "0.0.1",
+  "description": "Random Password Generator (Hint tool)",
+  "main": "server.js",
+  "directories": {
+    "doc": "doc",
+    "src": "source",
+    "tests": "tests and props"
+  },
+  "scripts": {
+    "aliases": "alias jasmine-node=./node_modules/.bin/jasmine-node; alias eslint=./node_modules/.bin/eslint; alias istanbul=./node_modules/.bin/istanbul",
+    "prep-tests": "rm -fr reports/; mkdir reports/; mkdir reports/eslint/; mkdir reports/junit/; echo \"Reports\n---\" > reports/README.md; echo \"Unit tests results\n---\" > reports/junit/README.md;  echo \"eslint results\n---\" > reports/eslint/README.md",
+    "_eslint": "npm run aliases; OUT='./reports/eslint/eslint.txt'; date > $OUT; eslint src/*.js >> $OUT; eslint ./*.js >> $OUT; eslint tests/specs/*.js >> $OUT; echo \"DONE!\"",
+    "_junit": "npm run prep-tests; npm run aliases; jasmine-node --junitreport --growl tests/specs/; mv reports/*.xml reports/junit/; git checkout tests/props/*.*",
+    "_coverage": "rm -fr reports/coverage/; npm run aliases; ./node_modules/.bin/istanbul cover --include-all-sources -x \"**src/sign-test.*\" ./node_modules/.bin/jasmine-node tests/specs/; rm -fr reports/coverage/; mv coverage reports/; git checkout tests/props/*.*",
+    "_integration": "echo \"placeholder for API test\"; exit 1",
+    "test": "./node_modules/.bin/jasmine-node --growl tests/specs/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://beinvloed@github.com/beinvloed/rpassgen.git"
+  },
+  "keywords": [
+    "password",
+    "language",
+    "latin",
+    "special",
+    "chars",
+    "tool",
+    "hint"
+  ],
+  "dependencies": {
+    "md5": "^2.2.1",
+    "sha1": "^1.1.1"
+  },
+  "devDependencies": {
+    "bash-color": "0.0.4",
+    "eslint": "3.19.0",
+    "fs": "0.0.1-security",
+    "frisby": "^0.8.5",
+    "istanbul": "0.4.5",
+    "jasmine-node": "1.14.5",
+    "md5-file": "^3.1.1"
+  },
+  "author": "Martin Swiderski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/beinvloed/rpassgen/issues"
+  },
+  "homepage": "https://github.com/beinvloed/rpassgen#readme"
+}
