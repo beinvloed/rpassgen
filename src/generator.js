@@ -8,6 +8,13 @@ function Generator() {
 
     var _generator = require('./generator-config.json');
 
+    this.errors = [];
+
+    this.kill_idle      = 120;
+    this.minlength      = 2;
+    this.default_offset = 2;
+    this.all_unique     = -1;
+
     this.toString = function(value) {
         return (new String(value)).valueOf();
     };
@@ -15,40 +22,89 @@ function Generator() {
     /**
      * Actual draw logic
      * @param array elements Elements to draw from
-     * @param int   count    Number of elements to draw
-     * @param offset         After how many elements in draw a result can repeat itself eg. ABFLEA = 4 (5th element was once pulled)
+     * @param int   length   Number of elements to draw
+     * @param offset         -1 means all unique, After how many elements in draw a result can repeat itself eg. ABFLEA = 5 (exclusive, the 5th element was once pulled)
      */
-    this.random = function(elements, count, offset) {
+    this.draw = function(elements, length, offset) {
+        var _past = {}, draw = [], _itm, _r = -1, _elen = -1, _idle = 0,
+            _input = JSON.parse(JSON.stringify({
+                elements: {
+                    items: elements,
+                    length: -1
+                },
+                init: {
+                    length: length,
+                    offset: offset
+                }
+            }));
+
         try {
-            count = this.toInt(nvl(count, 2));
+            length = this.toInt(nvl(length, 2));
             offset = this.toInt(nvl(offset, -1));
+            _input.parsed = {
+                length: length = this.toInt(nvl(length, 2)),
+                offset: offset = this.toInt(nvl(offset, -1))
+            };
+
             if (typeof elements.indexOf !== 'function') {
                 throw new Error('Not a valid array of elements');
             }
-            if (typeof count !== 'number') {
+            _input.elements.length = _elen = elements.length;
+
+            if (typeof length !== 'number') {
                 throw new Error('Not a valid number defining length');
             }
             if (typeof offset !== 'number') {
                 throw new Error('Not a valid number defining offset');
             }
 
-            console.log();
+            while (draw.length < length && _idle < this.kill_idle) { // we are after string and elements can be multi dimentional
+                _r = this.rand(0, _elen-1);
+                _itm = elements[_r]; // item
+                if (offset===-1) {
+                    // unique draw
+                    if (typeof _past[_itm] === 'undefined') {
+                        draw.push(_itm);
+                        _past[_itm] = draw.length; // current pointer
+                    } else {
+                        ++_idle;
+                    }
+                } else {
+                    // non-unique with assumed offset
+                    if (typeof _past[_itm] === 'undefined' || typeof _past[_itm] !== 'undefined' && (_past[_itm]+offset-1)<draw.length+1) {
+                        draw.push(_itm);
+                        _past[_itm] = draw.length; // current pointer
+                    } else {
+                        ++_idle;
+                    }
+                }
+            }
 
+            return draw; // populated
 
         } catch (err) {
-
+            this.errors.push({
+                message: err.message,
+                input: _input,
+                object: err
+            });
+            //console.log(this.errors);
+            return draw; // empty
         }
+    };
 
 
+    this.rand = function(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max)+1;
+        return Math.floor(Math.random() * (max - min)) + min;
     };
 
 
     this.toInt = function(input) {
         try {
-            if (typeof count !== 'number') {
-                throw new Error('Not a valid number defining length');
-            }
-            return Math.floor(parseInt(count));
+            if (typeof input !== 'number') throw new Error('Not a valid number defining length');
+            return Math.floor(parseInt(input));
         } catch (err) {
             return false;
         }
