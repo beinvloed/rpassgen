@@ -39,11 +39,9 @@ function Generator() {
             }));
 
         try {
-            length = this.toInt(nvl(length, 2));
-            offset = this.toInt(nvl(offset, -1));
             _input.parsed = {
-                length: length = this.toInt(nvl(length, 2)),
-                offset: offset = this.toInt(nvl(offset, -1))
+                length: length = this.toInt(nvl(length, this.minlength)),
+                offset: offset = this.toInt(nvl(offset, this.default_offset))
             };
 
             if (typeof elements.indexOf !== 'function') {
