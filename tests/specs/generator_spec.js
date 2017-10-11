@@ -189,3 +189,35 @@ describe('implements draw feature', function () {
     });
 });
 
+describe('implements C/V patterns generator', function () {
+    it('based on given length', function () {
+        var generator3 = Generator.new(),
+            cvString = generator3.cvPattern(22),
+            cvTest = cvString.split('c').join('').split('v').join('');
+        expect(cvString.length).toBe(22);
+        expect(cvTest.length).toBe(0); // contains only C and V
+    });
+});
+
+describe('implements C/V patterns letterify', function () {
+    it('based on given string', function () {
+        var generator4 = Generator.new(),
+            cvString2 = generator4.cvPattern(12),
+            word = generator4.letterify(cvString2);
+        expect(cvString2.length).toBe(word.length);
+        expect(word).toBe(word.toLocaleUpperCase());
+        expect(word).not.toBe(word.toLocaleLowerCase());
+    });
+    it('does mixed case', function () {
+        var generator5 = Generator.new(),
+            word3 = generator5.mixCase(
+                generator5.letterify(
+                    generator5.cvPattern(12)
+                )
+            );
+        console.log(word3);
+        expect(word3.length).toBe(12);
+        expect(word3).not.toBe(word3.toLocaleUpperCase());
+        expect(word3).not.toBe(word3.toLocaleLowerCase());
+    });
+});

@@ -127,19 +127,54 @@ function Generator() {
      * @returns {Generator}
      * @see JSON config file 'patterns' section
      */
-    this.generatePattern = function(length) {
-
-        return this;
+    this.cvPattern = function(length) {
+        var c = 0, _p = 0, _t = length, lengths = [], draw = [];
+        for (var i in _generator.patterns) lengths.push(++c);
+        while (_t > 0) {
+            _p = this.draw(lengths, 1, -1);
+            _t = _t - _p;
+            draw.push(this.draw(_generator.patterns[_p], 1, -1));
+        }
+        return draw.join('').substr(0, length);
     };
 
     /**
      * Populates generated CV patterns with letters
-     * @param int allowRepetition Number of characters after which a letter can repeat itself in the word.
+     * @param string input Pattern of c/v input
+     * @param int allowRepetitionAfter Number of characters after which a letter can repeat itself in the word.
      * @returns {Generator}
      */
-    this.populateLetters = function(allowRepetition) {
-        allowRepetition = nvl(allowRepetition, 2);
-        return this;
+    this.letterify = function(input, allowRepetitionAfter) {
+        allowRepetitionAfter = nvl(allowRepetitionAfter, this.default_offset);
+        var _d = '',
+            draw = {
+            _i: input,
+            _out: [],
+            i: input.length,
+            _c: input.split('c').join(''),
+            c: input.length - (input.split('c').join('').length),
+            _C: [],
+            _v: input.split('v').join(''),
+            v: input.length - (input.split('v').join('').length),
+            _V: []
+        };
+        draw._C = this.draw(_generator.range.letters.consonants, draw.c, allowRepetitionAfter);
+        draw._V = this.draw(_generator.range.letters.vowels, draw.v, allowRepetitionAfter);
+
+        for (var i=0; i<input.length; i++) {
+            _d = (input[i]==='c') ? draw._C : draw._V;
+            draw._out.push(_d[0]);
+            _d.splice(0, 1);
+        }
+        return draw['_out'].join('');
+    };
+
+    this.mixCase = function(input) {
+        var out = []
+        for (var i=0; i<input.length; i++) {
+            out.push((this.rand(0, 1) === 1) ? input[i].toLocaleUpperCase() : input[i].toLocaleLowerCase());
+        }
+        return out.join('');
     };
 
     this.new = function() {
